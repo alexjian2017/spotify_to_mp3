@@ -16,19 +16,7 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 def get_playlist_from_spotify(playlist_id: str):
 
     results = sp.playlist(playlist_id)
-
-    # with open('data.json', 'w') as f:
-    #     json.dump(results, f)
     folder = results['name']
-
-    # 單線程
-    # for i, track in enumerate(results['tracks']['items']):
-    #     song_name = track['track']['name'].strip()
-    #     singer = track['track']['artists'][0]['name'].strip()
-    #     video_id = youtube_search(f'{song_name} {singer}')
-    #     song_name = shorten_song_name(song_name)
-    #     download_audio_from_yt(
-    #         f'v={video_id}', folder, f'{i+1:02}.{song_name} {singer}.mp3')
 
     with ThreadPoolExecutor(max_workers=16) as pool:
         for i, track in enumerate(results['tracks']['items']):
@@ -60,7 +48,7 @@ def get_track_from_spotify(track_id: str):
     video_id = youtube_search(f'{song_name} {singer}')
     song_name = shorten_song_name(song_name)
     download_audio_from_yt(
-        f'v={video_id}', './單曲', f'{singer} - {song_name}.mp3')
+        f'v={video_id}', './Single', f'{singer} - {song_name}.mp3')
 
 
 def check_input_validation(prefix: str, url: str) -> bool:
@@ -99,13 +87,13 @@ def download_audio_from_yt(url: str, folder: str, filename: str) -> None:
         file = yt.streams.filter(only_audio=True).first()
         file.download(f'./{folder}', filename=filename)
     except Exception as e:
-        print(e)
+        print(f"'{yt.title}' has some problem. {e}")
     else:
-        print(f"'{yt.title}'已經下載完成")
+        print(f"'{yt.title}' has downloaded")
 
 
 if __name__ == '__main__':
-    print("請輸入要下載spotify的網址: ")
+    print("Please enter the spotify URL you want to download: ")
     url = input().strip()
     if 'playlist' in url and check_input_validation('playlist', url):
         get_playlist_from_spotify(url)
@@ -114,4 +102,4 @@ if __name__ == '__main__':
     elif 'track' in url and check_input_validation('track', url):
         get_track_from_spotify(url)
     else:
-        print("這不是一個有效的spotify路徑喔!")
+        print("This is not a valid Spotify url (we only provide downloads for playlists, albums, and tracks.)")
