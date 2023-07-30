@@ -1,0 +1,4 @@
+requests
+spotipy
+pytube
+youtube_search
